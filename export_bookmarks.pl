@@ -70,10 +70,10 @@ sub flatten_bookmarks {
         } else {
             push @attrs, "parent_guid=$parent_info", "order=$order";
         }
-        # Sort keys alphabetically for consistent attribute order
+        # Sort keys and exclude meta_info
         push @attrs, map { "$_=$node->{$_}" }
             sort
-            grep { $_ ne 'type' && $_ ne 'guid' && $_ ne 'children' && $_ ne 'date_modified' }
+            grep { $_ ne 'type' && $_ ne 'guid' && $_ ne 'children' && $_ ne 'date_modified' && $_ ne 'meta_info' }
             keys %$node;
         push @lines, "folder: guid=$node->{guid}, " . join(", ", @attrs);
 
@@ -84,10 +84,10 @@ sub flatten_bookmarks {
         }
     } elsif ($node->{type} eq "url") {
         my @attrs = ("parent_guid=$parent_info", "order=$order");
-        # Sort keys alphabetically for consistent attribute order
+        # Sort keys and exclude meta_info
         push @attrs, map { "$_=$node->{$_}" }
             sort
-            grep { $_ ne 'type' && $_ ne 'guid' && $_ ne 'date_modified' }
+            grep { $_ ne 'type' && $_ ne 'guid' && $_ ne 'date_modified' && $_ ne 'meta_info' }
             keys %$node;
         push @lines, "url: guid=$node->{guid}, " . join(", ", @attrs);
     }
