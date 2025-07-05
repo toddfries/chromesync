@@ -6,17 +6,15 @@ use File::Slurp;
 use Getopt::Long;
 
 # Command-line arguments
-my $profile;
 my $input;
 my $output;
 GetOptions(
-    "profile=i" => \$profile,
     "input=s"   => \$input,
     "output=s"  => \$output
-) or die "Usage: $0 --profile N --input file.txt --output file.json\n";
+) or die "Usage: $0 --input file.txt --output file.json\n";
 
-die "Error: --profile, --input, and --output required.\nUsage: $0 --profile N --input file.txt --output file.json\n"
-    unless defined $profile && defined $input && defined $output;
+die "Error: --input, and --output required.\nUsage: $0 --input file.txt --output file.json\n"
+    unless defined $input && defined $output;
 
 # Read input text file
 die "Error: Input file not found at $input\n" unless -f $input;
@@ -72,7 +70,11 @@ for my $guid (keys %nodes_by_guid) {
 for my $guid (keys %nodes_by_guid) {
     my $node = $nodes_by_guid{$guid};
     if ($node->{type} eq "folder" && exists $node->{children}) {
-        $node->{children} = [ sort { $a->{order} <=> $b->{order} } @{$node->{children}} ];
+        $node->{children} = [ sort {
+		$a->{order} = 0 if ! defined $a->{order};
+		$b->{order} = 0 if ! defined $b->{order};
+		$a->{order} <=> $b->{order} } @{$node->{children}
+	} ];
     }
     delete $node->{order};
     delete $node->{parent_guid};
