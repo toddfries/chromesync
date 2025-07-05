@@ -20,5 +20,8 @@ do
 		rm $taf
 		continue
 	fi
-	mv $taf $af
+	if perl ./merge_bookmarks.pl --upstream $taf --local $af --output .tmp${alias}.b; then
+		mv .tmp${alias}.b $af
+	fi
+	rm -f $taf .tmp${alias}.b
 done < plist
