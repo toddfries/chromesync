@@ -17,7 +17,11 @@ die "Error: --profile and --output required.\nUsage: $0 --profile N --output fil
     unless defined $profile && defined $output;
 
 # Path to Chromium Bookmarks file
-my $bookmarks_file = "$ENV{HOME}/.config/chromium/Profile $profile/Bookmarks";
+my $pname = "Profile $profile";
+if ($profile == 0) {
+	$pname = "Default";
+}
+my $bookmarks_file = "$ENV{HOME}/.config/chromium/${pname}/Bookmarks";
 die "Error: Bookmarks file not found at $bookmarks_file\n" unless -f $bookmarks_file;
 
 # Read and decode JSON
