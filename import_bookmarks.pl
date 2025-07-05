@@ -5,7 +5,7 @@ use JSON;
 use File::Slurp;
 use Getopt::Long;
 
-# Command-line argument parsing
+# Command-line arguments
 my $profile;
 my $input;
 my $output;
@@ -15,97 +15,80 @@ GetOptions(
     "output=s"  => \$output
 ) or die "Usage: $0 --profile N --input file.txt --output file.json\n";
 
-# Check for required arguments
-die "Error: --profile, --input, and --output are required.\nUsage: $0 --profile N --input file.txt --output file.json\n"
+die "Error: --profile, --input, and --output required.\nUsage: $0 --profile Ascendancy die "Error: --profile, --input, and --output required.\nUsage: $0 --profile N --input file.txt --output file.json\n"
     unless defined $profile && defined $input && defined $output;
 
-# Read the input text file
+# Read input text file
 die "Error: Input file not found at $input\n" unless -f $input;
-my @lines;
-eval {
-    @lines = read_file($input, chomp => 1);
-};
-die "Error: Failed to read input file $input: $@\n" if $@;
+my @lines = read_file($input, chomp => 1) or die "Error: Failed to read $input: $!\n";
 
-# Hash to store nodes by GUID
 my %nodes_by_guid;
 
-# Parse each line
+# Parse text file
 for my $line (@lines) {
-    next unless $line =~ /\S/;  # Skip empty lines
+    next unless $line =~ /\S/;
     my ($type, $attrs_str) = split /: /, $line, 2;
-    unless (defined $type && defined $attrs_str) {
-        warn "Warning: Skipping malformed line: $line\n";
-        next;
-    }
-    unless ($type eq "folder" || $type eq "url") {
-        warn "Warning: Unknown type in line: $line\n";
+    unless (defined $type && defined $attrs_str && ($type eq "folder" || $type eq "url")) {
+        warn "Warning: Skipping invalid line: $line\n";
         next;
     }
 
-    my @attrs = split /, /, $attrs_str;
     my %attributes;
     my $has_guid = 0;
-    for my $attr (@attrs) {
+    for my $attr (split /, /, $attrs_str) {
         my ($key, $value) = split /=/, $attr, 2;
-        unless (defined $key && defined $value) {
-            warn "Warning: Invalid attribute in line: $line\n";
-            next;
-        }
+        next unless defined $key && defined $value;
         $attributes{$key} = $value;
         $has_guid = 1 if $key eq "guid";
     }
+    next unless $has_guid;
 
-    unless ($has_guid) {
-        warn "Warning: Skipping line with no guid: $line\n";
-        next;
-    }
-
-    my $node;
-    if ($type eq "folder") {
-        $node = { type => "folder", children => [], %attributes };
-    } elsif ($type eq "url") {
-        $node = { type => "url", %attributes };
-    }
+    my $node = $type eq "folder"
+        ? { type => "folder", children => [], %attributes }
+        : { type => "url", %attributes };
     $nodes_by_guid{$node->{guid}} = $node;
 }
 
-# Check if we have any nodes
-die "Error: No valid bookmark entries found in $input\n" unless %nodes_by_guid;
+die "Error: No valid entries in $input\n" unless %nodes_by_guid;
 
-# Build the tree
+# Build tree
 my $tree = { roots => {} };
 for my $guid (keys %nodes_by_guid) {
     my $node = $nodes_by_guid{$guid};
     if (exists $node->{root}) {
-        my $root = delete $node->{root};
-        $tree->{roots}{$root} = $node;
+        $tree->{roots}{delete $node->{root}} = $node;
     }
     if (exists $node->{parent_guid}) {
         my $parent_guid = $node->{parent_guid};
         if (exists $nodes_by_guid{$parent_guid}) {
             push @{$nodes_by_guid{$parent_guid}{children}}, $node;
-            delete $node->{parent_guid};
         } else {
             warn "Warning: Parent GUID $parent_guid not found for node $guid\n";
         }
     }
 }
 
-# Check if roots were populated
+# Sort children by order
+for my $guid (keys %nodes_by_guid) {
+    my $node = $nodes_by_guid{$guid};
+    if ($node->{type} eq "folder" && exists $node->{children}) {
+        $node->{children} = [ sort { $a->{order} <=> $b->{order} } @{$node->{children}} ];
+    }
+}
+
+# Clean up temporary attributes
+for my $node (values %nodes_by_guid) {
+    delete $node->{order};
+    delete $node->{parent_guid};
+}
+
 warn "Warning: No top-level roots found; output may be incomplete\n"
     unless keys %{$tree->{roots}};
 
-# Encode to JSON and write to output file
-my $json_text;
-eval {
-    $json_text = encode_json($tree);
-};
-die "Error: Failed to encode JSON: $@\n" if $@;
+# Encode JSON with sorted keys and pretty-printing
+my $json = JSON->new->canonical(1)->pretty;
+my $json_text = $json->encode($tree) or die "Error: Failed to encode JSON: $!\n";
 
-eval {
-    write_file($output, { atomic => 1 }, $json_text);
-};
-die "Error: Failed to write to output file $output: $@\n" if $@;
-
+# Write output
+write_file($output, { atomic => 1 }, $json_text) or die "Error: Failed to write $output: $!\n";
 print "Bookmarks imported to $output\n";
