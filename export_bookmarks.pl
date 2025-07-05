@@ -71,8 +71,8 @@ sub flatten_bookmarks {
             push @attrs, "parent_guid=$parent_info", "order=$order";
         }
         push @attrs, map { "$_=$node->{$_}" }
-            grep { $_ ne 'type' && $_ ne 'guid' && $_ ne 'children' }
-            sort keys %$node;
+            grep { $_ ne 'type' && $_ ne 'guid' && $_ ne 'children' && $_ ne 'date_modified' }
+            keys %$node;
         push @lines, "folder: guid=$node->{guid}, " . join(", ", @attrs);
 
         if (exists $node->{children} && ref($node->{children}) eq 'ARRAY') {
@@ -83,7 +83,7 @@ sub flatten_bookmarks {
     } elsif ($node->{type} eq "url") {
         my @attrs = ("parent_guid=$parent_info", "order=$order");
         push @attrs, map { "$_=$node->{$_}" }
-            grep { $_ ne 'type' && $_ ne 'guid' }
+            grep { $_ ne 'type' && $_ ne 'guid' && $_ ne 'date_modified' }
             keys %$node;
         push @lines, "url: guid=$node->{guid}, " . join(", ", @attrs);
     }
