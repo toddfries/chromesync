@@ -11,8 +11,8 @@ my $local_file;
 my $output_file;
 GetOptions(
     "upstream=s" => \$upstream_file,
-    "local=s" => \$local_file,
-    "output=s"  => \$output_file
+    "local=s"    => \$local_file,
+    "output=s"   => \$output_file
 ) or die "Usage: $0 --upstream upstream_ttf.b --local local_ttf.b --output merged_ttf.b\n";
 
 die "Error: --upstream, --local, and --output required.\n"
@@ -93,15 +93,21 @@ for my $guid (@all_guids) {
         my $local_parent = $local_attrs{root} // $local_attrs{parent_guid};
         my $parent_conflict = ($upstream_parent // '') ne ($local_parent // '');
 
-        # Check attribute differences (excluding parent and order)
+        # Check attribute differences (excluding parent, order, and date_last_used)
         my %attrs_diff;
         for my $key (sort keys %upstream_attrs) {
-            next if $key eq 'guid' || $key eq 'root' || $key eq 'parent_guid' || $key eq 'order';
+            next if $key eq 'guid' || $key eq 'root' || $key eq 'parent_guid' || $key eq 'order' || $key eq 'date_last_used';
             my $upstream_val = $upstream_attrs{$key} // '';
             my $local_val = $local_attrs{$key} // '';
             $attrs_diff{$key} = [$upstream_val, $local_val] if $upstream_val ne $local_val;
         }
         my $attrs_conflict = %attrs_diff;
+
+        # Handle date_last_used separately
+        my $chosen_date_last_used = $upstream_attrs{date_last_used} // '0';
+        if (exists $local_attrs{date_last_used} && $local_attrs{date_last_used} > $chosen_date_last_used) {
+            $chosen_date_last_used = $local_attrs{date_last_used};
+        }
 
         if ($parent_conflict || $attrs_conflict) {
             print "\nConflict for $upstream_node->{type} (guid=$guid, name=$upstream_attrs{name}):\n";
@@ -141,6 +147,9 @@ for my $guid (@all_guids) {
                 }
             }
 
+            # Set date_last_used
+            $merged_attrs{date_last_used} = $chosen_date_last_used;
+
             # Build merged line
             my @attrs;
             if ($chosen_parent && $chosen_parent =~ /^[a-z_]+$/) {
@@ -155,8 +164,21 @@ for my $guid (@all_guids) {
             my $line = "$upstream_node->{type}: guid=$guid, " . join(", ", @attrs);
             push @merged_lines, $line;
         } else {
-            # No conflict, use upstream version
-            push @merged_lines, $upstream_node->{line};
+            # No conflict, use upstream version with updated date_last_used
+            my %merged_attrs = %upstream_attrs;
+            $merged_attrs{date_last_used} = $chosen_date_last_used;
+            my @attrs;
+            if ($upstream_parent && $upstream_parent =~ /^[a-z_]+$/) {
+                push @attrs, "root=$upstream_parent";
+            } elsif ($upstream_parent) {
+                push @attrs, "parent_guid=$upstream_parent", "order=$upstream_attrs{order}";
+            }
+            push @attrs, map { "$_=$merged_attrs{$_}" }
+                sort
+                grep { $_ ne 'guid' && $_ ne 'root' && $_ ne 'parent_guid' && $_ ne 'order' }
+                keys %merged_attrs;
+            my $line = "$upstream_node->{type}: guid=$guid, " . join(", ", @attrs);
+            push @merged_lines, $line;
         }
     } elsif ($upstream_node) {
         # Only in upstream
