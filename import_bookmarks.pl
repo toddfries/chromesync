@@ -13,16 +13,14 @@ GetOptions(
     "profile=i" => \$profile,
     "input=s"   => \$input,
     "output=s"  => \$output
-) or die "Usage: $0 --profile N --input file.txt --output file.json";
+) or die "Usage: $0 --profile N --input file.txt --output file.json\n";
 
-die "Error: --profile, --input, and --output required.\n
-    Usage: $0 --profile number\n"
+die "Error: --profile, --input, and --output required.\nUsage: $0 --profile N --input file.txt --output file.json\n"
     unless defined $profile && defined $input && defined $output;
 
 # Read input text file
-die "Error: Input file not found at $input" unless -f $input;
-my @lines = read_file($input, chomp => 1) or
-	die "Error: Failed to read $input: $!";
+die "Error: Input file not found at $input\n" unless -f $input;
+my @lines = read_file($input, chomp => 1) or die "Error: Failed to read $input: $!\n";
 
 my %nodes_by_guid;
 
@@ -51,7 +49,7 @@ for my $line (@lines) {
     $nodes_by_guid{$node->{guid}} = $node;
 }
 
-die "Error: No valid entries in $input" unless %nodes_by_guid;
+die "Error: No valid entries in $input\n" unless %nodes_by_guid;
 
 # Build tree
 my $tree = { roots => {} };
@@ -70,18 +68,18 @@ for my $guid (keys %nodes_by_guid) {
     }
 }
 
-# Sort children by order
+# Sort children by order and clean up attributes
 for my $guid (keys %nodes_by_guid) {
     my $node = $nodes_by_guid{$guid};
     if ($node->{type} eq "folder" && exists $node->{children}) {
         $node->{children} = [ sort { $a->{order} <=> $b->{order} } @{$node->{children}} ];
     }
-}
-
-# Clean up temporary attributes
-for my $node (values %nodes_by_guid) {
     delete $node->{order};
     delete $node->{parent_guid};
+    # Add default meta_info to match original structure
+    $node->{meta_info} = { power_bookmark_meta => "" };
+    # Set default date_modified
+    $node->{date_modified} = "0" unless exists $node->{date_modified};
 }
 
 warn "Warning: No top-level roots found; output may be incomplete\n"
@@ -89,10 +87,8 @@ warn "Warning: No top-level roots found; output may be incomplete\n"
 
 # Encode JSON with sorted keys and pretty-printing
 my $json = JSON->new->canonical(1)->pretty;
-my $json_text = $json->encode($tree) or
-	die "Error: Failed to encode JSON: $!";
+my $json_text = $json->encode($tree) or die "Error: Failed to encode JSON: $!\n";
 
 # Write output
-write_file($output, { atomic => 1 }, $json_text) or
-	die "Error: Failed to write $output: $!";
+write_file($output, { atomic => 1 }, $json_text) or die "Error: Failed to write $output: $!\n";
 print "Bookmarks imported to $output\n";
