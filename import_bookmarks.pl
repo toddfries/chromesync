@@ -13,14 +13,16 @@ GetOptions(
     "profile=i" => \$profile,
     "input=s"   => \$input,
     "output=s"  => \$output
-) or die "Usage: $0 --profile N --input file.txt --output file.json\n";
+) or die "Usage: $0 --profile N --input file.txt --output file.json";
 
-die "Error: --profile, --input, and --output required.\nUsage: $0 --profile Ascendancy die "Error: --profile, --input, and --output required.\nUsage: $0 --profile N --input file.txt --output file.json\n"
+die "Error: --profile, --input, and --output required.\n
+    Usage: $0 --profile number\n"
     unless defined $profile && defined $input && defined $output;
 
 # Read input text file
-die "Error: Input file not found at $input\n" unless -f $input;
-my @lines = read_file($input, chomp => 1) or die "Error: Failed to read $input: $!\n";
+die "Error: Input file not found at $input" unless -f $input;
+my @lines = read_file($input, chomp => 1) or
+	die "Error: Failed to read $input: $!";
 
 my %nodes_by_guid;
 
@@ -49,7 +51,7 @@ for my $line (@lines) {
     $nodes_by_guid{$node->{guid}} = $node;
 }
 
-die "Error: No valid entries in $input\n" unless %nodes_by_guid;
+die "Error: No valid entries in $input" unless %nodes_by_guid;
 
 # Build tree
 my $tree = { roots => {} };
@@ -87,8 +89,10 @@ warn "Warning: No top-level roots found; output may be incomplete\n"
 
 # Encode JSON with sorted keys and pretty-printing
 my $json = JSON->new->canonical(1)->pretty;
-my $json_text = $json->encode($tree) or die "Error: Failed to encode JSON: $!\n";
+my $json_text = $json->encode($tree) or
+	die "Error: Failed to encode JSON: $!";
 
 # Write output
-write_file($output, { atomic => 1 }, $json_text) or die "Error: Failed to write $output: $!\n";
+write_file($output, { atomic => 1 }, $json_text) or
+	die "Error: Failed to write $output: $!";
 print "Bookmarks imported to $output\n";
