@@ -1,0 +1,24 @@
+#!/bin/sh
+
+host=$(hostname)
+
+while read lhost alias profile
+do
+	if ! [ "$host" = "$lhost" ]; then
+		continue
+	fi
+	echo "$alias $profile"
+	taf=".${alias}.b"
+	af="${alias}.b"
+	if ! perl ./export_bookmarks.pl --profile $profile --output $taf; then
+		echo "Export failure!"
+		exit 1
+	fi
+	tah=$(openssl sha1 < $taf | awk '{print $2}')
+	ah=$(openssl sha1 < $taf | awk '{print $2}')
+	if ! [ "$tah" = "$ah" ]; then
+		rm $taf
+		continue
+	fi
+	mv $taf $af
+done < plist
