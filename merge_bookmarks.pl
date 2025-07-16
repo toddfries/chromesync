@@ -26,7 +26,7 @@ my @local_lines = read_file($local_file, chomp => 1) or die "Error reading $loca
 
 # Initialize Term::ReadLine for interactive prompts
 my $term = Term::ReadLine->new('Bookmark Merger');
-my $prompt = "Choice: ";
+my $prompt = "Select option: 1=upstream, 2=local: ";
 
 # Parse a ttf.b file into a hash of nodes by guid
 sub parse_bookmarks {
@@ -78,6 +78,15 @@ sub get_parent_desc {
     return "unknown parent";
 }
 
+# Helper to get user choice
+sub get_choice {
+    my ($message) = @_;
+    print "$message\n";
+    print $prompt;
+    my $choice = $term->readline($prompt);
+    return $choice eq '2' ? 2 : 1;  # Default to 1 (upstream) if invalid
+}
+
 # Process each GUID
 for my $guid (@all_guids) {
     my $upstream_node = $upstream_nodes->{$guid};
@@ -103,7 +112,7 @@ for my $guid (@all_guids) {
         }
         my $attrs_conflict = %attrs_diff;
 
-        # Handle date_last_used separately
+        # Handle date_last_used automatically
         my $chosen_date_last_used = $upstream_attrs{date_last_used} // '0';
         if (exists $local_attrs{date_last_used} && $local_attrs{date_last_used} > $chosen_date_last_used) {
             $chosen_date_last_used = $local_attrs{date_last_used};
@@ -116,12 +125,11 @@ for my $guid (@all_guids) {
             my $chosen_parent;
             my $chosen_order;
             if ($parent_conflict) {
-                print "Parent conflict:\n";
-                print "  upstream: ", get_parent_desc($upstream_node, $upstream_nodes), "\n";
-                print "  local: ", get_parent_desc($local_node, $local_nodes), "\n";
-                print "Choose parent (1=upstream, 2=local): ";
-                my $choice = $term->readline($prompt);
-                if ($choice eq '2') {
+                my $message = "Parent conflict:\n" .
+                              "  1. upstream: " . get_parent_desc($upstream_node, $upstream_nodes) . "\n" .
+                              "  2. local: " . get_parent_desc($local_node, $local_nodes);
+                my $choice = get_choice($message);
+                if ($choice == 2) {
                     $chosen_parent = $local_parent;
                     $chosen_order = $local_attrs{order};
                 } else {
@@ -136,14 +144,12 @@ for my $guid (@all_guids) {
             # Handle attribute conflicts
             my %merged_attrs = %upstream_attrs;
             if ($attrs_conflict) {
-                print "Attribute conflicts:\n";
                 for my $key (sort keys %attrs_diff) {
-                    print "  $key:\n";
-                    print "    upstream: $attrs_diff{$key}[0]\n";
-                    print "    local: $attrs_diff{$key}[1]\n";
-                    print "  Choose (1=upstream, 2=local): ";
-                    my $choice = $term->readline($prompt);
-                    $merged_attrs{$key} = $attrs_diff{$key}[$choice eq '2' ? 1 : 0];
+                    my $message = "Attribute '$key' conflict:\n" .
+                                  "  1. upstream: $attrs_diff{$key}[0]\n" .
+                                  "  2. local: $attrs_diff{$key}[1]";
+                    my $choice = get_choice($message);
+                    $merged_attrs{$key} = $attrs_diff{$key}[$choice == 2 ? 1 : 0];
                 }
             }
 
@@ -171,7 +177,10 @@ for my $guid (@all_guids) {
             if ($upstream_parent && $upstream_parent =~ /^[a-z_]+$/) {
                 push @attrs, "root=$upstream_parent";
             } elsif ($upstream_parent) {
-                push @attrs, "parent_guid=$upstream_parent", "order=$upstream_attrs{order}";
+                push @attrs, "parent_guid=$upstream_parent";
+		if (defined $upstream_attrs{order}) {
+			push @attrs, "order=$upstream_attrs{order}";
+		}
             }
             push @attrs, map { "$_=$merged_attrs{$_}" }
                 sort
@@ -196,3 +205,4 @@ for my $guid (@all_guids) {
 write_file($output_file, { atomic => 1 }, join("\n", @merged_lines) . "\n")
     or die "Error writing $output_file: $!\n";
 print "Merged bookmarks written to $output_file\n";
+
