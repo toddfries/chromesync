@@ -60,7 +60,7 @@ print "Bookmarks exported to $output\n";
 1;
 
 sub flatten_bookmarks {
-    my ($node, $parent_info, $order) = @_;
+    my ($node, $parent_info) = @_;
     return unless ref($node) eq 'HASH' && exists $node->{type} && exists $node->{guid};
 
     if ($node->{type} eq "folder") {
@@ -68,9 +68,8 @@ sub flatten_bookmarks {
         if ($parent_info =~ /^[a-z_]+$/) {  # Root keys
             push @attrs, "root=$parent_info";
         } else {
-            push @attrs, "parent_guid=$parent_info", "order=$order";
+            push @attrs, "parent_guid=$parent_info";
         }
-        # Sort keys and exclude meta_info
         push @attrs, map { "$_=$node->{$_}" }
             sort
             grep { $_ ne 'type' && $_ ne 'guid' && $_ ne 'children' && $_ ne 'date_modified' && $_ ne 'meta_info' }
@@ -78,13 +77,12 @@ sub flatten_bookmarks {
         push @lines, "folder: guid=$node->{guid}, " . join(", ", @attrs);
 
         if (exists $node->{children} && ref($node->{children}) eq 'ARRAY') {
-            for my $i (0..$#{$node->{children}}) {
-                flatten_bookmarks($node->{children}[$i], $node->{guid}, $i);
+            for my $child (@{$node->{children}}) {
+                flatten_bookmarks($child, $node->{guid});
             }
         }
     } elsif ($node->{type} eq "url") {
-        my @attrs = ("parent_guid=$parent_info", "order=$order");
-        # Sort keys and exclude meta_info
+        my @attrs = ("parent_guid=$parent_info");
         push @attrs, map { "$_=$node->{$_}" }
             sort
             grep { $_ ne 'type' && $_ ne 'guid' && $_ ne 'date_modified' && $_ ne 'meta_info' }
