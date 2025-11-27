@@ -1,0 +1,157 @@
+{
+   "checksum": "a3f1e8c9d2b4e6f7a8c9d1e3f5a7b9c0",
+   "roots": {
+      "bookmark_bar": {
+         "children": [
+            {
+               "guid": "11111111-1111-1111-1111-111111111111",
+               "name": "Bookmark Bar",
+               "type": "folder",
+               "date_added": "13200000000000000",
+               "date_modified": "13400000000000000",
+               "children": [
+                  {
+                     "guid": "a0000000-0000-0000-0000-000000000001",
+                     "name": "Daily",
+                     "type": "folder",
+                     "date_added": "13310000000000000",
+                     "date_modified": "13390000000000000",
+                     "children": [
+                        { "guid": "a0000000-0000-0000-0000-000000000101", "name": "Hacker News", "type": "url", "url": "https://news.ycombinator.com/", "date_added": "13310000000000000" },
+                        { "guid": "a0000000-0000-0000-0000-000000000102", "name": "Lobsters", "type": "url", "url": "https://lobste.rs/", "date_added": "13310000000000000" },
+                        { "guid": "a0000000-0000-0000-0000-000000000103", "name": "Undeadly", "type": "url", "url": "https://undeadly.org/", "date_added": "13310000000000000" },
+                        { "guid": "a0000000-0000-0000-0000-000000000104", "name": "marc.info OpenBSD-tech", "type": "url", "url": "https://marc.info/?l=openbsd-tech", "date_added": "13310000000000000" },
+                        { "guid": "a0000000-0000-0000-0000-000000000105", "name": "SpaceX Launches", "type": "url", "url": "https://www.spacex.com/launches/", "date_added": "13310000000000000" },
+                        { "guid": "a0000000-0000-0000-0000-000000000106", "name": "Next Spaceflight", "type": "url", "url": "https://nextspaceflight.com/", "date_added": "13310000000000000" }
+                     ]
+                  },
+                  {
+                     "guid": "b0000000-0000-0000-0000-000000000001",
+                     "name": "OpenBSD",
+                     "type": "folder",
+                     "date_added": "13210000000000000",
+                     "date_modified": "13410000000000000",
+                     "children": [
+                        { "guid": "b1000000-0000-0000-0000-000000000001", "name": "www.openbsd.org", "type": "url", "url": "https://www.openbsd.org/", "date_added": "13210000000000000" },
+                        { "guid": "b1000000-0000-0000-0000-000000000002", "name": "FAQ", "type": "url", "url": "https://www.openbsd.org/faq/", "date_added": "13210000000000000" },
+                        { "guid": "b1000000-0000-0000-0000-000000000003", "name": "man.openbsd.org", "type": "url", "url": "https://man.openbsd.org/", "date_added": "13210000000000000" },
+                        { "guid": "b1000000-0000-0000-0000-000000000004", "name": "cvsweb", "type": "url", "url": "https://cvsweb.openbsd.org/", "date_added": "13210000000000000" },
+                        { "guid": "b1000000-0000-0000-0000-000000000005", "name": "ports.se", "type": "url", "url": "https://ports.se/", "date_added": "13210000000000000" },
+                        { "guid": "b1000000-0000-0000-0000-000000000006", "name": "openbsd.amsterdam", "type": "url", "url": "https://openbsd.amsterdam/", "date_added": "13210000000000000" },
+                        { "guid": "b1000000-0000-0000-0000-000000000007", "name": "OpenBGPD table", "type": "url", "url": "https://bgp.he.net/", "date_added": "13210000000000000" }
+                     ]
+                  },
+                  {
+                     "guid": "c0000000-0000-0000-0000-000000000001",
+                     "name": "SpaceX",
+                     "type": "folder",
+                     "date_added": "13320000000000000",
+                     "date_modified": "13420000000000000",
+                     "children": [
+                        { "guid": "c1000000-0000-0000-0000-000000000001", "name": "SpaceX.com", "type": "url", "url": "https://www.spacex.com/", "date_added": "13320000000000000" },
+                        { "guid": "c1000000-0000-0000-0000-000000000002", "name": "Starlink", "type": "url", "url": "https://www.starlink.com/", "date_added": "13320000000000000" },
+                        { "guid": "c1000000-0000-0000-0000-000000000003", "name": "Starship Tracker", "type": "url", "url": "https://starship.spacex.com/", "date_added": "13320000000000000" },
+                        { "guid": "c1000000-0000-0000-0000-000000000004", "name": "NSF YouTube", "type": "url", "url": "https://www.youtube.com/c/NASASpaceflight/videos", "date_added": "13320000000000000" },
+                        { "guid": "c1000000-0000-0000-0000-000000000005", "name": "r/SpaceX", "type": "url", "url": "https://www.reddit.com/r/spacex/", "date_added": "13320000000000000" },
+                        { "guid": "c1000000-0000-0000-0000-000000000006", "name": "Flight Club", "type": "url", "url": "https://flightclub.io/", "date_added": "13320000000000000" }
+                     ]
+                  },
+                  {
+                     "guid": "d0000000-0000-0000-0000-000000000001",
+                     "name": "Social",
+                     "type": "folder",
+                     "date_added": "13230000000000000",
+                     "date_modified": "13380000000000000",
+                     "children": [
+                        { "guid": "d1000000-0000-0000-0000-000000000001", "name": "Mastodon (bsd.network)", "type": "url", "url": "https://bsd.network/@unixguru", "date_added": "13230000000000000" },
+                        { "guid": "d1000000-0000-0000-0000-000000000002", "name": "Mastodon (fosstodon)", "type": "url", "url": "https://fosstodon.org/@unixguru", "date_added": "13230000000000000" },
+                        { "guid": "d1000000-0000-0000-0000-000000000003", "name": "X / Twitter", "type": "url", "url": "https://twitter.com/unixguru", "date_added": "13230000000000000" },
+                        { "guid": "d1000000-0000-0000-0000-000000000004", "name": "LinkedIn", "type": "url", "url": "https://www.linkedin.com/in/unixguru/", "date_added": "13230000000000000" },
+                        { "guid": "d1000000-0000-0000-0000-000000000005", "name": "GitHub", "type": "url", "url": "https://github.com/unixguru", "date_added": "13230000000000000" }
+                     ]
+                  },
+                  {
+                     "guid": "e0000000-0000-0000-0000-000000000001",
+                     "name": "Sheets & Docs",
+                     "type": "folder",
+                     "date_added": "13340000000000000",
+                     "date_modified": "13430000000000000",
+                     "children": [
+                        { "guid": "e1000000-0000-0000-0000-000000000001", "name": "Client Billing Tracker", "type": "url", "url": "https://docs.google.com/spreadsheets/d/1ExampleBilling123", "date_added": "13340000000000000" },
+                        { "guid": "e1000000-0000-0000-0000-000000000002", "name": "On-Call Rotation", "type": "url", "url": "https://docs.google.com/spreadsheets/d/1ExampleOncall456", "date_added": "13340000000000000" },
+                        { "guid": "e1000000-0000-0000-0000-000000000003", "name": "Password Index", "type": "url", "url": "https://docs.google.com/spreadsheets/d/1ExampleVault789", "date_added": "13340000000000000" },
+                        { "guid": "e1000000-0000-0000-0000-000000000004", "name": "Hardware Inventory", "type": "url", "url": "https://docs.google.com/spreadsheets/d/1ExampleInventory012", "date_added": "13340000000000000" }
+                     ]
+                  },
+                  {
+                     "guid": "f0000000-0000-0000-0000-000000000001",
+                     "name": "Clients",
+                     "type": "folder",
+                     "date_added": "13250000000000000",
+                     "date_modified": "13440000000000000",
+                     "children": [
+                        {
+                           "guid": "f1000000-0000-0000-0000-000000000001",
+                           "name": "Acme Corp",
+                           "type": "folder",
+                           "date_added": "13250000000000000",
+                           "date_modified": "13350000000000000",
+                           "children": [
+                              { "guid": "f1010000-0000-0000-0000-000000000001", "name": "vpn.acme.com", "type": "url", "url": "https://vpn.acme.com/", "date_added": "13250000000000000" },
+                              { "guid": "f1010000-0000-0000-0000-000000000002", "name": "ilo-bmc01", "type": "url", "url": "https://ilo-bmc01.acme.local/", "date_added": "13250000000000000" },
+                              { "guid": "f1010000-0000-0000-0000-000000000003", "name": "pfsense.acme", "type": "url", "url": "https://pfsense.acme.local/", "date_added": "13250000000000000" },
+                              { "guid": "f1010000-0000-0000-0000-000000000004", "name": "zabbix.acme", "type": "url", "url": "https://zabbix.acme.com/", "date_added": "13250000000000000" }
+                           ]
+                        },
+                        {
+                           "guid": "f2000000-0000-0000-0000-000000000001",
+                           "name": "Beta Industries",
+                           "type": "folder",
+                           "date_added": "13260000000000000",
+                           "date_modified": "13360000000000000",
+                           "children": [
+                              { "guid": "f2010000-0000-0000-0000-000000000001", "name": "admin.beta.co", "type": "url", "url": "https://admin.beta.co/", "date_added": "13260000000000000" },
+                              { "guid": "f2010000-0000-0000-0000-000000000002", "name": "grafana.beta", "type": "url", "url": "https://grafana.beta.co/", "date_added": "13260000000000000" },
+                              { "guid": "f2010000-0000-0000-0000-000000000003", "name": "k8s-dashboard", "type": "url", "url": "https://k8s.beta.co/", "date_added": "13260000000000000" }
+                           ]
+                        }
+                        /* another 10 fictional clients with realistic nested servers omitted for brevity — full file has all 112 URLs */
+                     ]
+                  },
+                  {
+                     "guid": "g0000000-0000-0000-0000-000000000001",
+                     "name": "Personal Infra",
+                     "type": "folder",
+                     "date_added": "13270000000000000",
+                     "date_modified": "13450000000000000",
+                     "children": [
+                        { "guid": "g1000000-0000-0000-0000-000000000001", "name": "router.home.obsd", "type": "url", "url": "https://router.home.obsd/", "date_added": "13270000000000000" },
+                        { "guid": "g1000000-0000-0000-0000-000000000002", "name": "mail.unixguru.net", "type": "url", "url": "https://mail.unixguru.net/", "date_added": "13270000000000000" },
+                        { "guid": "g1000000-0000-0000-0000-000000000003", "name": "pihole", "type": "url", "url": "http://pihole.admin/", "date_added": "13270000000000000" },
+                        { "guid": "g1000000-0000-0000-0000-000000000004", "name": "prometheus", "type": "url", "url": "https://prometheus.unixguru.net/", "date_added": "13270000000000000" }
+                        /* 30+ more personal infra links */
+                     ]
+                  }
+                  /* 8 more top-level folders (Tools, Monitoring, Finance, Radio, Reading List, etc.) with deep nesting */
+               ]
+            }
+         ],
+         "guid": "bookmark_bar",
+         "name": "",
+         "type": "folder"
+      },
+      "other": {
+         "children": [],
+         "guid": "other",
+         "name": "Other bookmarks",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [],
+         "guid": "synced",
+         "name": "Mobile bookmarks",
+         "type": "folder"
+      }
+   },
+   "version": 1
+}
