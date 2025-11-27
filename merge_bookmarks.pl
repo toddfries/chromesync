@@ -9,10 +9,14 @@ use Term::ReadLine;
 my $upstream_file;
 my $local_file;
 my $output_file;
+my $non_interactive = 0;
+my @predefined_answers;
 GetOptions(
     "upstream=s" => \$upstream_file,
     "local=s"    => \$local_file,
     "output=s"   => \$output_file
+    "non-interactive" => \$non_interactive,
+    "answer=s@" => \@predefined_answers,
 ) or die "Usage: $0 --upstream upstream_ttf.b --local local_ttf.b --output merged_ttf.b\n";
 
 die "Error: --upstream, --local, and --output required.\n"
@@ -81,6 +85,12 @@ sub get_parent_desc {
 # Helper to get user choice
 sub get_choice {
     my ($message) = @_;
+    if ($non_interactive) {
+        my $ans = shift @predefined_answers // "1";
+        print "$message\n=> choosing $ans (predefined)\n";
+        return $ans eq '2' ? 2 : 1;
+    }
+    # existing interactive code...
     print "$message\n";
     print $prompt;
     my $choice = $term->readline($prompt);
