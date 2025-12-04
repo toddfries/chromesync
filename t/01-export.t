@@ -41,11 +41,11 @@ system($^X, $script, '--profile', '0', '--output', "$dir/out.b") == 0
 
 my @got = sort map { chomp; $_ } do { local $/; open my $f, '<', "$dir/out.b"; <$f> =~ /(.*)/gs };
 
-my @exp = sort qw(
-folder: guid=b1, name=Bookmarks bar, root=bookmark_bar
-folder: guid=f1, name=AI, parent_guid=b1
-url: guid=u1, name=Grok, parent_guid=b1, url=https://x.com/i/grok
-url: guid=u2, name=Claude, parent_guid=f1, url=https://claude.ai/
+my @exp = sort (
+  'folder: guid=b1, name=Bookmarks bar, root=bookmark_bar',
+  'folder: guid=f1, name=AI, parent_guid=b1',
+  'url: guid=u1, name=Grok, parent_guid=b1, url=https://x.com/i/grok',
+  'url: guid=u2, name=Claude, parent_guid=f1, url=https://claude.ai/',
 );
 
 is_deeply(\@got, \@exp, "export produces correct lines");
