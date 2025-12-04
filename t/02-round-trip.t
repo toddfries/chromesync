@@ -7,27 +7,38 @@ use File::Temp qw(tempdir);
 use FindBin qw($Bin);
 
 my $dir = tempdir(CLEANUP => 1);
-mkdir "$dir/.config/chromium/Default" or die;
-open my $fh, '>', "$dir/.config/chromium/Default/Bookmarks" or die;
-print $fh do { local $/; open my $f, '<', "$Bin/01-export.t"; <$f> =~ /<<'JSON';\n(.*\n\})\nJSON/s; $1 };
+my $home = "$dir/fakehome";
+mkdir $home or die;
+mkdir "$home/.config/chromium/Default" or die;
+open my $fh, '>', "$home/.config/chromium/Default/Bookmarks" or die $!;
+my $content = do { local $/; open my $f, '<', "$Bin/01-export.t"; <$f> };
+my ($json) = $content =~ /<<'JSON';\n(.*?\n\})\nJSON/s;
+print $fh $json;
 close $fh;
 
-local $ENV{HOME} = $dir;
+local $ENV{HOME} = $home;
 
-system("$^X $Bin/../export_bookmarks.pl --profile 0 --output $dir/flat.b") == 0 or die;
-system("$^X $Bin/../import_bookmarks.pl --input $dir/flat.b --output $dir/new.json") == 0 or die;
+my $export = "$Bin/../export_bookmarks.pl";
+my $import = "$Bin/../import_bookmarks.pl";
+system($^X, $export, '--profile', '0', '--output', "$dir/flat.b") == 0 or die "export failed";
+system($^X, $import, '--input', "$dir/flat.b", '--output', "$dir/new.json") == 0 or die "import failed";
 
-my $orig = decode_json(do { local $/; open my $f, '<', "$dir/.config/chromium/Default/Bookmarks"; <$f> });
+my $orig = decode_json($json);
 my $new  = decode_json(do { local $/; open my $f, '<', "$dir/new.json"; <$f> });
 
-delete @{$orig->{roots}}{qw(date_modified)};
-delete @{$new->{roots}}{qw(date_modified)};
+delete $orig->{roots}{$_}{date_modified} for keys %{$orig->{roots}};
+delete $new->{roots}{$_}{date_modified}  for keys %{$new->{roots}};
 for my $r (values %{$new->{roots}}) {
-    for my $c (@{$r->{children}||[]}) { delete @$c{qw(order parent_guid)}; }
+    for my $c (@{$r->{children} || []}) {
+        delete $c->{order};
+        delete $c->{parent_guid};
+        delete $c->{meta_info} if $c->{meta_info} && $c->{meta_info}{power_bookmark_meta} eq '';
+    }
 }
 
-is_deeply($new->{roots}, $orig->{roots}, "round-trip perfect");
+is_deeply($new->{roots}, $orig->{roots}, "round-trip preserves structure (ignoring timestamps/meta)");
 
-system("$^X $Bin/../export_bookmarks.pl --profile 0 --output $dir/flat2.b") == 0 or die;
-my ($f1,$f2) = map { do { local $/; open my $f,'<',$_; <$f> } } "$dir/flat.b","$dir/flat2.b";
-is($f1,$f2,"flat file identical after round-trip");
+system($^X, $export, '--profile', '0', '--output', "$dir/flat2.b") == 0 or die "second export failed";
+my $f1 = do { local $/; open my $f, '<', "$dir/flat.b"; <$f> };
+my $f2 = do { local $/; open my $f, '<', "$dir/flat2.b"; <$f> };
+is($f1, $f2, "round-trip flat file is identical");

@@ -8,25 +8,36 @@ use FindBin qw($Bin);
 my $merge = "$Bin/../merge_bookmarks.pl";
 my $dir = tempdir(CLEANUP => 1);
 
-sub w { open my $f,'>',$_[0]; print $f $_[1] }
-sub r { local $/; open my $f,'<',$_[0]; <$f> }
+sub write_file {
+    open my $f, '>', $_[0] or die "write $_[0]: $!";
+    print $f $_[1];
+    close $f;
+}
+sub read_file {
+    local $/; open my $f, '<', $_[0] or die "read $_[0]: $!"; return <$f>;
+}
 
-w("$dir/up.b",  "url: guid=123, name=Grok, parent_guid=root, url=https://x.com/i/grok\n");
-w("$dir/loc.b", "url: guid=123, name=Grok Chat, parent_guid=root, url=https://x.com/i/grok?focus=1\n");
+write_file("$dir/up.b",   "url: guid=123, name=Grok, parent_guid=root, url=https://x.com/i/grok\n");
+write_file("$dir/loc.b",  "url: guid=123, name=Grok Chat, parent_guid=root, url=https://x.com/i/grok?focus=1\n");
 
-system("$^X $merge --upstream $dir/up.b --local $dir/loc.b --output $dir/o1.b --non-interactive --answer 1") == 0 or die;
-like(r("$dir/o1.b"), qr/x\.com\/i\/grok$/, "answer 1 keeps upstream/);
+# Test 1: Choose upstream (1)
+system($^X, $merge, '--upstream', "$dir/up.b", '--local', "$dir/loc.b", '--output', "$dir/o1.b", '--non-interactive', '--answer', '1') == 0 or die "merge1 failed";
+like(read_file("$dir/o1.b"), qr/x\.com/i/grok(?!\?focus), "choose upstream keeps old URL");
 
-system("$^X $merge --upstream $dir/up.b --local $dir/loc.b --output $dir/o2.b --non-interactive --answer 2") == 0 or die;
-like(r("$dir/o2.b"), qr/\?focus=1/, "answer 2 takes local URL");
-like(r("$dir/o2.b"), qr/Grok Chat/, "answer 2 takes local name");
+# Test 2: Choose local (2)
+system($^X, $merge, '--upstream', "$dir/up.b", '--local', "$dir/loc.b", '--output', "$dir/o2.b", '--non-interactive', '--answer', '2') == 0 or die "merge2 failed";
+like(read_file("$dir/o2.b"), qr/\?focus=1/, "choose local takes new URL");
+like(read_file("$dir/o2.b"), qr/Grok Chat/, "choose local takes new name");
 
-w("$dir/new.b", "url: guid=NEW, name=New Site, parent_guid=root, url=https://example.com\n");
-system("$^X $merge --upstream $dir/up.b --local $dir/new.b --output $dir/o3.b --non-interactive") == 0 or die;
-like(r("$dir/o3.b"), qr/example\.com/, "new bookmark added");
+# Test 3: Auto-add new from local
+write_file("$dir/new.b", "url: guid=NEW, name=New Site, parent_guid=root, url=https://example.com\n");
+system($^X, $merge, '--upstream', "$dir/up.b", '--local', "$dir/new.b", '--output', "$dir/o3.b", '--non-interactive') == 0 or die "merge3 failed";
+like(read_file("$dir/o3.b"), qr/example\.com/, "new local bookmark auto-added");
 
-my @lines = split /\n/, r("$dir/o3.b");
-is_deeply([sort @lines], [@lines], "output sorted");
+# Test 4: Output sorted
+my @lines = split /\n/, read_file("$dir/o3.b");
+is_deeply([sort @lines], [@lines], "merge output globally sorted");
 
-system("$^X $merge --upstream $dir/up.b --local $dir/loc.b --output $dir/o4.b --non-interactive") == 0 or die;
-like(r("$dir/o4.b"), qr/x\.com\/i\/grok$/, "no answer = upstream");
+# Test 5: Default to upstream (no --answer)
+system($^X, $merge, '--upstream', "$dir/up.b", '--local', "$dir/loc.b", '--output', "$dir/o4.b", '--non-interactive') == 0 or die "merge4 failed";
+like(read_file("$dir/o4.b"), qr/x\.com/i/grok(?!\?focus), "default chooses upstream");

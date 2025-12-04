@@ -25,30 +25,34 @@ my $fake_json = <<'JSON';
 JSON
 
 my $dir = tempdir(CLEANUP => 1);
-mkdir "$dir/.config"           or die;
-mkdir "$dir/.config/chromium"  or die;
-mkdir "$dir/.config/chromium/Default" or die;
-open my $fh, '>', "$dir/.config/chromium/Default/Bookmarks" or die;
+my $home = "$dir/fakehome";
+mkdir $home or die;
+mkdir "$home/.config" or die;
+mkdir "$home/.config/chromium" or die;
+mkdir "$home/.config/chromium/Default" or die;
+open my $fh, '>', "$home/.config/chromium/Default/Bookmarks" or die $!;
 print $fh $fake_json;
 close $fh;
 
-local $ENV{HOME} = $dir;
+local $ENV{HOME} = $home;
 
 system($^X, $script, '--profile', '0', '--output', "$dir/out.b") == 0
-    or die "export failed";
+    or die "export failed: $!";
 
-my @got = sort map { chomp; $_ } do { open my $f, '<', "$dir/out.b"; <$f> };
+my @got = sort map { chomp; $_ } do { local $/; open my $f, '<', "$dir/out.b"; <$f> =~ /(.*)/gs };
 
-my @exp = sort(
-  'folder: guid=b1, name=Bookmarks bar, root=bookmark_bar',
-  'folder: guid=f1, name=AI, parent_guid=b1',
-  'url: guid=u1, name=Grok, parent_guid=b1, url=https://x.com/i/grok',
-  'url: guid=u2, name=Claude, parent_guid=f1, url=https://claude.ai/',
+my @exp = sort qw(
+folder: guid=b1, name=Bookmarks bar, root=bookmark_bar
+folder: guid=f1, name=AI, parent_guid=b1
+url: guid=u1, name=Grok, parent_guid=b1, url=https://x.com/i/grok
+url: guid=u2, name=Claude, parent_guid=f1, url=https://claude.ai/
 );
 
 is_deeply(\@got, \@exp, "export produces correct lines");
-system($^X, $script, '--profile', '0', '--output', "$dir/out2.b") == 0 or die;
-my @got2 = sort map { chomp; $_ } do { open my $f, '<', "$dir/out2.b"; <$f> };
+
+system($^X, $script, '--profile', '0', '--output', "$dir/out2.b") == 0 or die "deterministic run failed";
+my @got2 = sort map { chomp; $_ } do { local $/; open my $f, '<', "$dir/out2.b"; <$f> =~ /(.*)/gs };
 is_deeply(\@got2, \@got, "export is deterministic");
-ok(@got > 2, "reasonable output size");
+
+ok(-s "$dir/out.b" > 200, "reasonable output size");
 ok(grep(/root=bookmark_bar/, @got), "root tagged correctly");
