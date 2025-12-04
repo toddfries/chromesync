@@ -10,7 +10,7 @@ do
 	echo "$alias $profile"
 	taf=".${alias}.b"
 	af="${alias}.b"
-	if ! perl ./export_bookmarks.pl --profile $profile --output $taf; then
+	if ! perl ./bookmarks.pl --mode=export --profile $profile --output $taf; then
 		echo "Export failure!"
 		exit 1
 	fi
@@ -22,7 +22,7 @@ do
 		echo "same hash, not merging $lhost:$alias"
 		continue
 	fi
-	if perl ./merge_bookmarks.pl --upstream $taf --local $af --output .tmp${alias}.b; then
+	if perl ./bookmarks.pl --mode=merge --upstream $taf --local $af --output .tmp${alias}.b; then
 		mv .tmp${alias}.b $af
 	else
 		echo "Merge error"

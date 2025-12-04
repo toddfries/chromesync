@@ -5,7 +5,7 @@ use Test::More tests => 6;
 use File::Temp qw(tempdir);
 use FindBin qw($Bin);
 
-my $merge = "$Bin/../merge_bookmarks.pl";
+my $merge = "$Bin/../bookmarks.pl --mode merge";
 my $dir = tempdir(CLEANUP => 1);
 
 sub write_file {

@@ -18,8 +18,8 @@ close $fh;
 
 local $ENV{HOME} = $home;
 
-my $export = "$Bin/../export_bookmarks.pl";
-my $import = "$Bin/../import_bookmarks.pl";
+my $export = "$Bin/../bookmarks.pl --mode export";
+my $import = "$Bin/../bookmarks.pl --mode import";
 system($^X, $export, '--profile', '0', '--output', "$dir/flat.b") == 0 or die "export failed";
 system($^X, $import, '--input', "$dir/flat.b", '--output', "$dir/new.json") == 0 or die "import failed";
 

@@ -5,7 +5,7 @@ use Test::More tests => 4;
 use FindBin qw($Bin);
 use File::Temp qw(tempdir);
 
-my $script = "$Bin/../export_bookmarks.pl";
+my $script = "$Bin/../bookmarks.pl";
 
 my $fake_json = <<'JSON';
 {
@@ -36,7 +36,7 @@ close $fh;
 
 local $ENV{HOME} = $home;
 
-system($^X, $script, '--profile', '0', '--output', "$dir/out.b") == 0
+system($^X, $script, '--mode', 'export', '--profile', '0', '--output', "$dir/out.b") == 0
     or die "export failed: $!";
 
 my @got = sort map { chomp; $_ } do { local $/; open my $f, '<', "$dir/out.b"; <$f> =~ /(.*)/gs };
@@ -50,7 +50,7 @@ my @exp = sort (
 
 is_deeply(\@got, \@exp, "export produces correct lines");
 
-system($^X, $script, '--profile', '0', '--output', "$dir/out2.b") == 0 or die "deterministic run failed";
+system($^X, $script, '--mode', 'export', '--profile', '0', '--output', "$dir/out2.b") == 0 or die "deterministic run failed";
 my @got2 = sort map { chomp; $_ } do { local $/; open my $f, '<', "$dir/out2.b"; <$f> =~ /(.*)/gs };
 is_deeply(\@got2, \@got, "export is deterministic");
 
